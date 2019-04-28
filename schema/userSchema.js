@@ -28,7 +28,10 @@ userSchema.methods = {
 	},
 	getToken: function () {
 		return jwt.encode(this, config.secret);
-	}
+	},
+        checkToken: function(token) {
+                return (jwt.encode(this, config.secret) == token);
+        }
 }
 
 module.exports = mongoose.model('User', userSchema);

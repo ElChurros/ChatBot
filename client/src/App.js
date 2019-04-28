@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { Dashboard } from './components/Dashboard/Dashboard.js';
+import { Messages } from './components/Messages/Messages.js';
 import { Login } from './components/Login/Login.js';
 import { Register } from './components/Register/Register.js';
 import { PrivateRoute } from './components/PrivateRoute.js';
@@ -14,7 +14,7 @@ class App extends Component {
                 <Switch>
                     <Route exact path="/" component={Login}/>
                     <Route exact path ="/register" component={Register}/>
-                    <PrivateRoute path='/dashboard' component={Dashboard} />
+                    <PrivateRoute path='/messages' component={Messages} />
                 </Switch>
             </div>
         </div>

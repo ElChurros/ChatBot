@@ -36,5 +36,9 @@ app.get('/hello',function(req,res){
 var userRouter = require(__dirname + '/controllers/userController');
 app.use('/user', userRouter);
 
+// Setup messages router
+var messagesRouter = require(__dirname + '/controllers/messageController');
+app.use('/messages', messagesRouter);
+
 var port = 8000;
 app.listen(port, () => console.log(`Listening on port ${port}`));

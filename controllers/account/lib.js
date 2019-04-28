@@ -1,12 +1,17 @@
-const User = require('../../schema/userSchema');
 const passwordHash = require("password-hash");
+
+const jwt = require('jwt-simple');
+const config = require('../../config/config');
+
+const User = require('../../schema/userSchema');
+const Message = require('../../schema/messageSchema');
 
 function register(req, res) {
         if (!req.body.username || !req.body.email || !req.body.password) {
                 //Le cas où l'email ou bien le password ne serait pas soumit ou nul
                 res.status(400).json({
-                        "text": "Requête invalideeee"
-                })
+                        "text": "Invalid request"
+        })
         } else {
                 var user = {
                         username: req.body.username,
@@ -98,5 +103,71 @@ function login(req, res) {
         }
 }
 
+function getMessages(req, res) {
+        console.log(req.decoded_token);
+        Message.find({user_id: req.decoded_token._id}, function (err, messages) {
+                if (err) {
+                        res.status(500).json({
+                                "text": "Erreur interne"
+                        })
+                } else {
+                        res.send(messages);
+                }
+        })
+}
+
+function addMessage(req, res) {
+        console.log(req.user);
+        var message = {
+                user_id: req.user,
+                text: req.body.new_message,
+                generated: false
+        };
+
+        var _m = new Message(message);
+        _m.save(function (err, message) {
+                console.log(message);
+                if (err) {
+                        res.status(500).json({
+                                "text": "Erreur interne"
+                        })
+                } else {
+                        res.status(200).json({
+                                "text": "Message POST successful",
+                                "new_message": message
+                        })
+                }
+        })
+}
+
+function requireAuth(req, res, next) {
+        if (!req.body.token) {
+                res.status(401).json({
+                        "text": "Authentication needed"
+                })
+        } else {
+                req.decoded_token = jwt.decode(req.body.token, config.secret);
+                User.findOne({
+                        email: req.decoded_token.email
+                }, function (err, user) {
+                        if (err) {
+                                res.status(500).json({
+                                        "text": "Erreur interne"
+                                })
+                        } else if (!user || !user.checkToken(req.body.token)) {
+                                res.status(401).json({
+                                        "text": "Bad Token"
+                                })
+                        } else {
+                                req.user = user;
+                                next();
+                        }
+                })
+        }
+}
+
 exports.login = login;
 exports.register = register;
+exports.requireAuth = requireAuth;
+exports.getMessages = getMessages;
+exports.addMessage = addMessage;
